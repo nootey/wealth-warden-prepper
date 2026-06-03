@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - ../logs:/app/logs
+      - ../config.yaml:/app/config.yaml
