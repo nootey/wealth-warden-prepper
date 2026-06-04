@@ -1,6 +1,12 @@
 # quiccpy-start
 
-A generic Python project template using `uv`, `structlog`, `pydantic`, and `pydantic-settings`.
+Helper script to migrate bank statements to a format, that Wealth Warden expects. Currently only supports some Slovene banks.
+
+## Docs
+
+Check out the docs for instructions on how to fetch statements from different banks.
+Currently supported:
+- [NLB](./docs/bank_statements/nlb.md)
 
 ## Requirements
 
@@ -23,43 +29,3 @@ make run
 uv run python -m main
 ```
 
-## Configuration
-
-Config is loaded from `config.yaml`. See `config.example.yaml` for all available fields.
-
-### Env var overrides
-
-Any config value can be overridden with an environment variable using the `APP_` prefix and `__` as the nested delimiter. 
-Env vars take priority over `config.yaml`.
-
-```bash
-# Override logging level
-APP_LOGGING__LEVEL=DEBUG
-```
-
-## Testing
-
-```bash
-make test
-# or
-uv run --group dev pytest
-```
-
-Tests live in `tests/` mirroring the `src/` structure.
-
-## Linting
-
-```bash
-make lint
-# or
-uv run ruff check . --fix
-```
-
-## Docker
-
-```bash
-cd deployment
-docker compose up
-```
-
-Volumes mount `logs/` and `config.yaml` from the project root into the container.
