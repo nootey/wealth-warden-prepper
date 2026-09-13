@@ -2,39 +2,27 @@ name: "Test"
 
 on:
   push:
-    paths-ignore:
-      - 'deployment/**'
-      - '*.md'
-      - 'storage/**'
-      - 'logs/**'
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [main]
+    paths-ignore: ['*.md']
   pull_request:
-    paths-ignore:
-      - 'deployment/**'
-      - '*.md'
-      - 'storage/**'
-      - 'logs/**'
-    branches:
-      - main
-    types: [opened, synchronize]
+    branches: [main]
+    paths-ignore: ['*.md']
+  workflow_dispatch:
 
 jobs:
   test:
-    name: Run tests
+    name: Lint and test
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v6
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-go@v6
         with:
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --group dev
-
-      - name: Run pytest
-        run: uv run --group dev pytest
+          go-version-file: go.mod
+      - name: Install poppler
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - name: vet
+        run: go vet ./...
+      - name: test
+        run: go test ./...
