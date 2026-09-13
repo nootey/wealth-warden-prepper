@@ -8,7 +8,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// "47,00", "1", "19,9", "1.658,83", "0,87-"
+// "47,00", "1", "19,9", "1.658,83", "0,87-", "4.49", "1,234.56"
 func parseAmount(s string) (decimal.Decimal, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -24,9 +24,12 @@ func parseAmount(s string) (decimal.Decimal, error) {
 		s = strings.TrimPrefix(s, "-")
 	}
 	s = strings.TrimPrefix(s, "+")
-	if strings.Contains(s, ",") {
+	// The last separator is the decimal one.
+	if strings.LastIndex(s, ",") > strings.LastIndex(s, ".") {
 		s = strings.ReplaceAll(s, ".", "")
 		s = strings.ReplaceAll(s, ",", ".")
+	} else {
+		s = strings.ReplaceAll(s, ",", "")
 	}
 	d, err := decimal.NewFromString(s)
 	if err != nil {
@@ -38,7 +41,7 @@ func parseAmount(s string) (decimal.Decimal, error) {
 	return d, nil
 }
 
-var dateLayouts = []string{"02-01-2006", "02/01/2006", "02.01.2006", "02.01.06"}
+var dateLayouts = []string{"02-01-2006", "02/01/2006", "02.01.2006", "02.01.06", "2. 1. 2006"}
 
 func parseDate(s string) (time.Time, error) {
 	s = strings.TrimSpace(s)
