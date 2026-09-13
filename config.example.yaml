@@ -1,3 +1,0 @@
-# Logging configuration
-logging:
-  level: INFO  # DEBUG, WARNING, ERROR
