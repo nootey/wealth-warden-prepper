@@ -16,6 +16,7 @@ type Txn struct {
 	TxnDate         string `json:"txn_date"`
 	Category        string `json:"category"`
 	Description     string `json:"description"`
+	ExternalID      string `json:"external_txn_id"` // empty when the statement gives none (PDF)
 }
 
 type Payload struct {
@@ -45,6 +46,7 @@ func Build(identifier string, txns []statement.Transaction, now time.Time) Paylo
 			TxnDate:         t.Date.UTC().Format("2006-01-02T15:04:05Z"),
 			Category:        Uncategorized,
 			Description:     desc,
+			ExternalID:      t.ExternalID,
 		})
 	}
 	return out
