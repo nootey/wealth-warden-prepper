@@ -45,6 +45,35 @@ func TestParseCSV(t *testing.T) {
 	}
 }
 
+const csvHeader2025 = "Namen,Kategorija,+/-,Znesek,Valuta,Datum plačila,Naziv prejemnika/plačnika,Naslov prejemnika/plačnika,Račun prejemnika/plačnika,BIC koda,Status,Menjalni tečaj,Referenca prejemnika,Datum poravnave,Dodatni stroški,ID transakcije"
+
+func TestParseCSV2025(t *testing.T) {
+	in := "\uFEFF" + csvHeader2025 + "\n" +
+		"STR VOD. PAKETA,Finance & Zavarovanja,-,4.49,EUR,31. 12. 2025,,,,,,,,31. 12. 2025,,1643150897\n" +
+		"\"ČEVELJCI, ANA Č. 0038640737471\",Prenosi,+,32.00,EUR,5. 3. 2025,ANA Č.,.,.,HDELSI22,,,NRC00,5. 3. 2025,,1630401993\n" +
+		"AVTORIZACIJA DM - S021 LJUBLJANA,,-,17.10,EUR,31. 12. 2025,,,,,AVTORIZACIJA,,,31. 12. 2025,,1642229965\n"
+
+	txns, err := ParseCSV(strings.NewReader(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(txns) != 2 {
+		t.Fatalf("got %d transactions, want 2 (pending authorisation skipped)", len(txns))
+	}
+
+	a := txns[0]
+	if a.Direction != statement.Expense || a.Amount.String() != "4.49" || a.BankCategory != "Finance & Zavarovanja" ||
+		a.Description != "STR VOD. PAKETA" || a.ExternalID != "1643150897" || a.Date.Format("2006-01-02") != "2025-12-31" {
+		t.Errorf("row 1 parsed wrong: %+v", a)
+	}
+	b := txns[1]
+	if b.Direction != statement.Income || b.Amount.String() != "32" || b.Counterparty != "ANA Č." ||
+		b.Description != "ČEVELJCI, ANA Č. 0038640737471" || b.Reference != "NRC00" || b.ExternalID != "1630401993" ||
+		b.Date.Format("2006-01-02") != "2025-03-05" {
+		t.Errorf("row 2 parsed wrong: %+v", b)
+	}
+}
+
 func TestParseCSVMissingColumn(t *testing.T) {
 	if _, err := ParseCSV(strings.NewReader("a;b;c\n1;2;3\n")); err == nil {
 		t.Error("expected error for unknown header")

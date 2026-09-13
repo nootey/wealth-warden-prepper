@@ -24,12 +24,33 @@ const (
 	colSettleDate   = "settlement date"
 	colTxnID        = "transaction id"
 	colPurpose      = "purpose"
+	colStatus       = "status"
 )
+
+// Exports since 2021 are comma-separated with Slovene-only headers.
+var slHeaders = map[string]string{
+	"Namen":                     colDescription,
+	"Kategorija":                colCategory,
+	"Znesek":                    colAmount,
+	"Valuta":                    colCurrency,
+	"Datum plačila":             colValueDate,
+	"Naziv prejemnika/plačnika": colCounterparty,
+	"Račun prejemnika/plačnika": colAccount,
+	"Referenca prejemnika":      colReference,
+	"Datum poravnave":           colSettleDate,
+	"ID transakcije":            colTxnID,
+}
+
+// Card authorisations that are not booked yet; they show up again once booked.
+const statusPending = "AVTORIZACIJA"
 
 func headerKey(h string) string {
 	h = strings.TrimSpace(strings.TrimPrefix(h, "\uFEFF"))
 	if h == colSign {
 		return colSign
+	}
+	if k, ok := slHeaders[h]; ok {
+		return k
 	}
 	if i := strings.LastIndex(h, "/"); i >= 0 {
 		h = h[i+1:]
@@ -46,6 +67,9 @@ func ParseCSV(r io.Reader) ([]statement.Transaction, error) {
 
 	cr := csv.NewReader(bytes.NewReader(raw))
 	cr.Comma = ';'
+	if header, _, _ := bytes.Cut(raw, []byte("\n")); !bytes.Contains(header, []byte(";")) {
+		cr.Comma = ','
+	}
 	cr.LazyQuotes = true
 	cr.FieldsPerRecord = -1
 	cr.TrimLeadingSpace = true
@@ -81,6 +105,9 @@ func ParseCSV(r io.Reader) ([]statement.Transaction, error) {
 			continue
 		}
 		line := n + 2
+		if strings.EqualFold(get(row, colStatus), statusPending) {
+			continue
+		}
 
 		amount, err := parseAmount(get(row, colAmount))
 		if err != nil {
