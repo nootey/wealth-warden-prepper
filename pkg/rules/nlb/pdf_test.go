@@ -1,4 +1,4 @@
-package banknlb
+package nlb
 
 import (
 	"os"
@@ -72,7 +72,7 @@ func TestParsePDFText(t *testing.T) {
 // exist and pdftotext is installed, check the parsed sums against the totals
 // printed on the statement itself.
 func TestParsePDFSamples(t *testing.T) {
-	path := filepath.Join("..", "..", "data", "input", "nlb", "Izpisek_2026_09_13_14_11_00.pdf")
+	path := filepath.Join("..", "..", "..", "data", "input", "nlb", "Izpisek_2026_09_13_14_11_00.pdf")
 	if _, err := os.Stat(path); err != nil {
 		t.Skip("sample statement not present")
 	}

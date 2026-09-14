@@ -3,12 +3,14 @@ package bank
 import (
 	"sort"
 
-	"github.com/nootey/wealth-warden-prepper/pkg/banknlb"
+	"github.com/nootey/wealth-warden-prepper/pkg/rules/generic"
+	"github.com/nootey/wealth-warden-prepper/pkg/rules/nlb"
 	"github.com/nootey/wealth-warden-prepper/pkg/statement"
 )
 
 var registry = map[string]statement.Parser{
-	"nlb": banknlb.NLB{},
+	"nlb":     nlb.NLB{},
+	"generic": generic.Generic{},
 }
 
 func Get(name string) (statement.Parser, bool) {

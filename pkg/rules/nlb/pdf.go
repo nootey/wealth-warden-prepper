@@ -1,4 +1,4 @@
-package banknlb
+package nlb
 
 import (
 	"fmt"
@@ -67,15 +67,15 @@ func ParsePDFText(lines []string) ([]statement.Transaction, error) {
 
 		if m := pdfTxnRe.FindStringSubmatch(line); m != nil {
 			flush()
-			date, err := parseDate(m[1])
+			date, err := statement.ParseDate(m[1])
 			if err != nil {
 				return nil, fmt.Errorf("line %d: %w", n+1, err)
 			}
-			amount, err := parseAmount(m[3])
+			amount, err := statement.ParseAmount(m[3])
 			if err != nil {
 				return nil, fmt.Errorf("line %d: %w", n+1, err)
 			}
-			balance, err := parseAmount(m[4])
+			balance, err := statement.ParseAmount(m[4])
 			if err != nil {
 				return nil, fmt.Errorf("line %d: %w", n+1, err)
 			}

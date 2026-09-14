@@ -1,4 +1,4 @@
-package banknlb
+package nlb
 
 import (
 	"strings"
