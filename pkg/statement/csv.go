@@ -40,7 +40,9 @@ var baseAliases = map[string]Field{
 	"value date":            FieldValueDate,
 	"booking date":          FieldValueDate,
 	"transaction date":      FieldValueDate,
+	"completed date":        FieldValueDate,
 	"settlement date":       FieldSettleDate,
+	"started date":          FieldSettleDate,
 	"counterparty":          FieldCounterparty,
 	"counter party name":    FieldCounterparty,
 	"payee":                 FieldCounterparty,
@@ -53,6 +55,7 @@ var baseAliases = map[string]Field{
 	"transaction id":        FieldTxnID,
 	"purpose":               FieldPurpose,
 	"status":                FieldStatus,
+	"state":                 FieldStatus,
 	"balance":               FieldBalance,
 }
 
@@ -61,7 +64,12 @@ var baseAliases = map[string]Field{
 type CSVHints struct {
 	// Aliases maps a raw, untrimmed-of-slashes header exactly as it appears
 	// in the file to a Field, checked before the base dictionary.
-	Aliases              map[string]Field
+	Aliases map[string]Field
+	// Signature lists raw header names that identify this bank for
+	// auto-detection. When nil, detection falls back to Aliases' keys; set
+	// this explicitly once a bank's real fingerprint headers have moved
+	// into the base dictionary and are no longer in its own Aliases.
+	Signature            []string
 	DateLayouts          []string
 	DefaultCurrency      string
 	SkipStatusValues     []string
@@ -100,6 +108,29 @@ func sniffDelimiter(raw []byte) rune {
 		}
 	}
 	return best
+}
+
+// DetectCSVScore counts how many header cells match hints' Signature
+// (falling back to Aliases' keys when Signature is nil).
+func DetectCSVScore(hints CSVHints, header []string) int {
+	sig := hints.Signature
+	if sig == nil {
+		for k := range hints.Aliases {
+			sig = append(sig, k)
+		}
+	}
+	set := make(map[string]bool, len(sig))
+	for _, s := range sig {
+		set[s] = true
+	}
+	n := 0
+	for _, h := range header {
+		key := strings.TrimSpace(strings.TrimPrefix(h, "\uFEFF"))
+		if set[key] {
+			n++
+		}
+	}
+	return n
 }
 
 func PeekCSVHeader(raw []byte) ([]string, error) {

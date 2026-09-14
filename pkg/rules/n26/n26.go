@@ -2,7 +2,6 @@ package n26
 
 import (
 	"io"
-	"strings"
 
 	"github.com/nootey/wealth-warden-prepper/pkg/statement"
 )
@@ -33,13 +32,4 @@ func ParseCSV(r io.Reader) ([]statement.Transaction, error) {
 func (N26) ParseCSV(r io.Reader) ([]statement.Transaction, error) { return ParseCSV(r) }
 func (N26) ParsePDF(r io.Reader) ([]statement.Transaction, error) { return ParsePDF(r) }
 
-func (N26) DetectCSV(header []string) int {
-	n := 0
-	for _, h := range header {
-		key := strings.TrimSpace(strings.TrimPrefix(h, "\uFEFF"))
-		if _, ok := csvHints.Aliases[key]; ok {
-			n++
-		}
-	}
-	return n
-}
+func (N26) DetectCSV(header []string) int { return statement.DetectCSVScore(csvHints, header) }

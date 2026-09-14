@@ -19,6 +19,11 @@ func TestDetectCSV(t *testing.T) {
 			want:   "n26",
 		},
 		{
+			name:   "revolut",
+			header: []string{"Type", "Product", "Started Date", "Completed Date", "Description", "Amount", "Fee", "Currency", "State", "Balance"},
+			want:   "revolut",
+		},
+		{
 			name:   "unrecognized falls back to generic",
 			header: []string{"Date", "Description", "Amount"},
 			want:   "generic",
@@ -50,6 +55,12 @@ func TestDetectPDF(t *testing.T) {
 			name:   "n26",
 			lines:  []string{"Sample Payments                                     25.08.2026   +103,00€"},
 			want:   "n26",
+			wantOK: true,
+		},
+		{
+			name:   "revolut",
+			lines:  []string{"Jan 1, 2026         Sample Payment                                                €50.00            €50.00"},
+			want:   "revolut",
 			wantOK: true,
 		},
 		{

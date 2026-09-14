@@ -43,6 +43,7 @@ func ParseAmount(s string) (decimal.Decimal, error) {
 
 var DateLayouts = []string{
 	"02-01-2006", "02/01/2006", "02.01.2006", "02.01.06", "2. 1. 2006", "2006-01-02",
+	"2006-01-02 15:04:05", "Jan 2, 2006",
 }
 
 func ParseDate(s string, extra ...string) (time.Time, error) {

@@ -6,10 +6,11 @@ custom transaction import.
 
 Supported banks:
 
-| Bank | Format                     |
-|------|----------------------------|
+| Bank           | Format                     |
+|----------------|----------------------------|
 | NLB (Slovenia) | CSV export / PDF statement |
-| N26 | CSV export / PDF statement |
+| N26            | CSV export / PDF statement |
+| Revolut        | CSV export / PDF statement |
 
 Anything else can be tried with `-bank generic`. It sniffs the CSV delimiter
 and maps common column names (date, amount, description, IBAN, ...) without
@@ -107,10 +108,3 @@ so those need an actual parser. Look at `pkg/rules/nlb/pdf.go` or
 
 Either way, once the type implements `statement.Parser`, register it in
 `pkg/bank/bank.go`.
-
-## Development
-
-```bash
-make test
-make lint
-```

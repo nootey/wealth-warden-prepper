@@ -4,7 +4,7 @@
 
 - `prepper` is a Go CLI that parses bank statements (CSV and PDF) into a normalized JSON payload for import into Wealth Warden
 - Parsing is split into a shared, best-effort engine (`pkg/statement`) and small per-bank rule sets (`pkg/rules/<bank>`) that only supply what the engine can't guess: header aliases and defaults for CSV, a line-format regex for PDF
-- Supported banks: `nlb`, `n26`. Unrecognized banks fall back to `generic`, which runs the shared engine with no bank-specific hints
+- Supported banks: `nlb`, `n26`, `revolut`. Unrecognized banks fall back to `generic`, which runs the shared engine with no bank-specific hints
 - To onboard a new bank: try `-bank generic` on its CSV first, see what it can't map, then add a rule set next to the existing ones. PDF layouts don't generalize, so those stay bank-specific from the start
 
 
