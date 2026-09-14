@@ -1,6 +1,9 @@
 package bank
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestDetectCSV(t *testing.T) {
 	tests := []struct {
@@ -80,4 +83,33 @@ func TestDetectPDF(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseAuto(t *testing.T) {
+	csv := "Date,Amount\n2026-01-01,10.00\n"
+
+	t.Run("routes .csv to ParseCSVAuto", func(t *testing.T) {
+		txns, name, err := ParseAuto(strings.NewReader(csv), ".csv")
+		if err != nil {
+			t.Fatalf("ParseAuto() error = %v", err)
+		}
+		if name != "generic" {
+			t.Errorf("ParseAuto() name = %q, want %q", name, "generic")
+		}
+		if len(txns) != 1 {
+			t.Errorf("ParseAuto() got %d transactions, want 1", len(txns))
+		}
+	})
+
+	t.Run("extension match is case-insensitive", func(t *testing.T) {
+		if _, _, err := ParseAuto(strings.NewReader(csv), ".CSV"); err != nil {
+			t.Fatalf("ParseAuto() error = %v", err)
+		}
+	})
+
+	t.Run("unsupported extension errors", func(t *testing.T) {
+		if _, _, err := ParseAuto(strings.NewReader(csv), ".txt"); err == nil {
+			t.Fatal("ParseAuto() error = nil, want error for unsupported extension")
+		}
+	})
 }
