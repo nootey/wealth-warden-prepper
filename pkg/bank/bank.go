@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 
 	"github.com/nootey/wealth-warden-prepper/pkg/pdftext"
 	"github.com/nootey/wealth-warden-prepper/pkg/rules/generic"
@@ -94,4 +95,15 @@ func ParsePDFAuto(r io.Reader) ([]statement.Transaction, string, error) {
 	}
 	txns, err := lp.ParsePDFLines(lines)
 	return txns, name, err
+}
+
+func ParseAuto(r io.Reader, ext string) ([]statement.Transaction, string, error) {
+	switch strings.ToLower(ext) {
+	case ".csv":
+		return ParseCSVAuto(r)
+	case ".pdf":
+		return ParsePDFAuto(r)
+	default:
+		return nil, "", fmt.Errorf("unsupported file type %q", ext)
+	}
 }

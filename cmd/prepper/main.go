@@ -113,14 +113,7 @@ func parseFile(parser statement.Parser, bankName, path string) ([]statement.Tran
 
 	ext := strings.ToLower(filepath.Ext(path))
 	if bankName == "auto" {
-		switch ext {
-		case ".csv":
-			return bank.ParseCSVAuto(f)
-		case ".pdf":
-			return bank.ParsePDFAuto(f)
-		default:
-			return nil, "", fmt.Errorf("unsupported file type %q", ext)
-		}
+		return bank.ParseAuto(f, ext)
 	}
 
 	switch ext {
