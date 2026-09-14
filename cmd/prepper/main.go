@@ -19,7 +19,7 @@ import (
 
 func main() {
 	fs := flag.NewFlagSet("prepper", flag.ContinueOnError)
-	bankName := fs.String("bank", "nlb", "bank format ("+strings.Join(bank.Names(), ", ")+")")
+	bankName := fs.String("bank", "auto", "bank format: auto (default, detected per file), or one of: "+strings.Join(bank.Names(), ", "))
 	id := fs.String("id", "", "import identifier (default: bank_<year range>)")
 	debug := fs.Bool("debug", false, "log at debug level")
 	fs.Usage = func() {
@@ -45,18 +45,28 @@ func main() {
 }
 
 func run(log *zap.Logger, bankName, id string, inputs []string, out string) error {
-	parser, ok := bank.Get(bankName)
-	if !ok {
-		return fmt.Errorf("unsupported bank %q", bankName)
+	var parser statement.Parser
+	if bankName != "auto" {
+		p, ok := bank.Get(bankName)
+		if !ok {
+			return fmt.Errorf("unsupported bank %q", bankName)
+		}
+		parser = p
 	}
 
 	var txns []statement.Transaction
+	detected := bankName
 	for _, path := range inputs {
-		parsed, err := parseFile(parser, path)
+		parsed, name, err := parseFile(parser, bankName, path)
 		if err != nil {
 			return fmt.Errorf("%s: %w", path, err)
 		}
-		log.Info("Parsed statement", zap.String("file", path), zap.Int("transactions", len(parsed)))
+		if name != "" {
+			log.Info("Parsed statement", zap.String("file", path), zap.String("bank", name), zap.Int("transactions", len(parsed)))
+			detected = name
+		} else {
+			log.Info("Parsed statement", zap.String("file", path), zap.Int("transactions", len(parsed)))
+		}
 		txns = append(txns, parsed...)
 	}
 	before := len(txns)
@@ -70,7 +80,7 @@ func run(log *zap.Logger, bankName, id string, inputs []string, out string) erro
 	}
 
 	if id == "" {
-		id = defaultIdentifier(bankName, txns)
+		id = defaultIdentifier(detected, txns)
 	}
 	payload := format.Build(id, txns, time.Now())
 
@@ -94,20 +104,34 @@ func run(log *zap.Logger, bankName, id string, inputs []string, out string) erro
 	return nil
 }
 
-func parseFile(parser statement.Parser, path string) ([]statement.Transaction, error) {
+func parseFile(parser statement.Parser, bankName, path string) ([]statement.Transaction, string, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer func() { _ = f.Close() }()
 
-	switch strings.ToLower(filepath.Ext(path)) {
+	ext := strings.ToLower(filepath.Ext(path))
+	if bankName == "auto" {
+		switch ext {
+		case ".csv":
+			return bank.ParseCSVAuto(f)
+		case ".pdf":
+			return bank.ParsePDFAuto(f)
+		default:
+			return nil, "", fmt.Errorf("unsupported file type %q", ext)
+		}
+	}
+
+	switch ext {
 	case ".csv":
-		return parser.ParseCSV(f)
+		txns, err := parser.ParseCSV(f)
+		return txns, "", err
 	case ".pdf":
-		return parser.ParsePDF(f)
+		txns, err := parser.ParsePDF(f)
+		return txns, "", err
 	default:
-		return nil, fmt.Errorf("unsupported file type %q", filepath.Ext(path))
+		return nil, "", fmt.Errorf("unsupported file type %q", ext)
 	}
 }
 

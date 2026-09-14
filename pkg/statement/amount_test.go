@@ -1,4 +1,4 @@
-package banknlb
+package statement
 
 import (
 	"testing"
@@ -12,7 +12,7 @@ func TestParseAmount(t *testing.T) {
 		"4.49": "4.49", "1,234.56": "1234.56",
 	}
 	for in, want := range cases {
-		got, err := parseAmount(in)
+		got, err := ParseAmount(in)
 		if err != nil {
 			t.Fatalf("%q: %v", in, err)
 		}
@@ -20,7 +20,7 @@ func TestParseAmount(t *testing.T) {
 			t.Errorf("%q: got %s want %s", in, got, want)
 		}
 	}
-	if _, err := parseAmount("abc"); err == nil {
+	if _, err := ParseAmount("abc"); err == nil {
 		t.Error("expected error for abc")
 	}
 }
@@ -28,7 +28,7 @@ func TestParseAmount(t *testing.T) {
 func TestParseDate(t *testing.T) {
 	want := time.Date(2017, 12, 20, 0, 0, 0, 0, time.UTC)
 	for _, in := range []string{"20-12-2017", "20/12/2017", "20.12.2017", "20.12.17", "20. 12. 2017"} {
-		got, err := parseDate(in)
+		got, err := ParseDate(in)
 		if err != nil || !got.Equal(want) {
 			t.Errorf("%q: got %v err %v", in, got, err)
 		}
