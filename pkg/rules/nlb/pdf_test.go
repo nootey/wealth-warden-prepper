@@ -10,7 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// Trimmed, anonymised output of `pdftotext -layout` for a two-page statement.
+// Trimmed, fabricated `pdftotext -layout` output for a two-page statement.
 const pdfFixture = `
 Datum          Naziv nalogodajalca/prejemnika                                    Račun prejemnika                                   Promet v dobro/breme                           Stanje
                Namen/opis spremembe                                              Referenčna številka
@@ -20,16 +20,16 @@ EUR - EVRO
                SKUPNI PROMET V DOBRO                                       4.413,11
                NOVO STANJE                                                 2.148,17
 
-29.07.26       SAMPLE TRANSIT                                                                                                                                     -1,50                   1.657,33
-01.08.26       JANE DOE                                                       DE00 0000 0000 0000 0000 00                                               +0,10                   1.657,43
+29.07.26       SAMPLE TRANSIT                                                                                                                              -1,50                   1.657,33
+01.08.26       SAMPLE PERSON A                                                 DE00 0000 0000 0000 0000 00                                               +0,10                   1.657,43
                SENT FROM N26
-02.08.26       SAMPLE PERSON B                                                        .                                                                       +97,00                    1.754,43
+02.08.26       SAMPLE PERSON B                                                  .                                                                       +97,00                    1.754,43
                SAMPLE PERSON B 0000000000000
 02.11.16       PROVIZIJA                                                                                                                                  -5,00                       0,87-
-20.08.26       SAMPLE GYM D.O.O.                       AT00 0000 0000 0000 0000                               -39,90                                                             2.341,60
-               SAMPLE-REF-0001 BASIC 39.90 EUR         SAMPLE-REF-0001
+20.08.26       SAMPLE GYM D.O.O.                        AT00 0000 0000 0000 0000                              -39,90                                                             2.341,60
+               SAMPLE-REF-0001 BASIC 39.90 EUR           SAMPLE-REF-0001
                01.08.26 - 31.08.26
-24.08.26       SAMPLE PERSON C                               .                                                     +25,00                                                             1.852,62
+24.08.26       SAMPLE PERSON C                            .                                                     +25,00                                                             1.852,62
                ., SAMPLE PERSON C
                                                                                 Št. izpiska 08
                                                                                 Stran 03
@@ -56,7 +56,7 @@ func TestParsePDFText(t *testing.T) {
 		}
 	}
 	check(0, statement.Expense, "1.5", "SAMPLE TRANSIT", "", "", "", "1657.33")
-	check(1, statement.Income, "0.1", "JANE DOE", "DE00 0000 0000 0000 0000 00", "SENT FROM N26", "", "1657.43")
+	check(1, statement.Income, "0.1", "SAMPLE PERSON A", "DE00 0000 0000 0000 0000 00", "SENT FROM N26", "", "1657.43")
 	check(2, statement.Income, "97", "SAMPLE PERSON B", "", "SAMPLE PERSON B 0000000000000", "", "1754.43")
 	check(3, statement.Expense, "5", "PROVIZIJA", "", "", "", "-0.87")
 	check(4, statement.Expense, "39.9", "SAMPLE GYM D.O.O.", "AT00 0000 0000 0000 0000",

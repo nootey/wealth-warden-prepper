@@ -50,7 +50,7 @@ const csvHeader2025 = "Namen,Kategorija,+/-,Znesek,Valuta,Datum plačila,Naziv p
 func TestParseCSV2025(t *testing.T) {
 	in := "\uFEFF" + csvHeader2025 + "\n" +
 		"STR VOD. PAKETA,Finance & Zavarovanja,-,4.49,EUR,31. 12. 2025,,,,,,,,31. 12. 2025,,9000000001\n" +
-		"\"SAMPLE STORE, SAMPLE PERSON B 0000000000000\",Prenosi,+,32.00,EUR,5. 3. 2025,SAMPLE PERSON B,.,.,HDELSI22,,,NRC00,5. 3. 2025,,9000000002\n" +
+		"\"SAMPLE STORE, SAMPLE PERSON B 0000000000000\",Prenosi,+,32.00,EUR,5. 3. 2025,SAMPLE PERSON B,.,.,TESTSI22,,,NRC00,5. 3. 2025,,9000000002\n" +
 		"AVTORIZACIJA SAMPLE STORE - S021 SAMPLE CITY,,-,17.10,EUR,31. 12. 2025,,,,,AVTORIZACIJA,,,31. 12. 2025,,9000000003\n"
 
 	txns, err := ParseCSV(strings.NewReader(in))

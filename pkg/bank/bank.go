@@ -4,12 +4,14 @@ import (
 	"sort"
 
 	"github.com/nootey/wealth-warden-prepper/pkg/rules/generic"
+	"github.com/nootey/wealth-warden-prepper/pkg/rules/n26"
 	"github.com/nootey/wealth-warden-prepper/pkg/rules/nlb"
 	"github.com/nootey/wealth-warden-prepper/pkg/statement"
 )
 
 var registry = map[string]statement.Parser{
 	"nlb":     nlb.NLB{},
+	"n26":     n26.N26{},
 	"generic": generic.Generic{},
 }
 
