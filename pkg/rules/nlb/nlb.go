@@ -2,13 +2,18 @@ package nlb
 
 import (
 	"io"
+	"strings"
 
 	"github.com/nootey/wealth-warden-prepper/pkg/statement"
 )
 
 type NLB struct{}
 
-var _ statement.Parser = NLB{}
+var (
+	_ statement.Parser      = NLB{}
+	_ statement.Detector    = NLB{}
+	_ statement.LinesParser = NLB{}
+)
 
 // Exports since 2021 are comma-separated with Slovene-only headers; older
 // exports are semicolon-separated with bilingual "Slovene/English" headers,
@@ -38,3 +43,17 @@ func ParseCSV(r io.Reader) ([]statement.Transaction, error) {
 
 func (NLB) ParseCSV(r io.Reader) ([]statement.Transaction, error) { return ParseCSV(r) }
 func (NLB) ParsePDF(r io.Reader) ([]statement.Transaction, error) { return ParsePDF(r) }
+
+// Only the 2021+ Slovene-only headers are covered here; older bilingual
+// exports resolve via the shared base dictionary and carry no bank-specific
+// signal, so they fall back to generic and need -bank nlb.
+func (NLB) DetectCSV(header []string) int {
+	n := 0
+	for _, h := range header {
+		key := strings.TrimSpace(strings.TrimPrefix(h, "\uFEFF"))
+		if _, ok := csvHints.Aliases[key]; ok {
+			n++
+		}
+	}
+	return n
+}

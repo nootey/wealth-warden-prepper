@@ -33,6 +33,16 @@ type Parser interface {
 	ParsePDF(r io.Reader) ([]Transaction, error)
 }
 
+// Detector scores: higher is a better match, 0 means no match.
+type Detector interface {
+	DetectCSV(header []string) int
+	DetectPDF(lines []string) int
+}
+
+type LinesParser interface {
+	ParsePDFLines(lines []string) ([]Transaction, error)
+}
+
 // Keeps the first of each ExternalID.
 func Dedupe(txns []Transaction) []Transaction {
 	seen := make(map[string]bool, len(txns))

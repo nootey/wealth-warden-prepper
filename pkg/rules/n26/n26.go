@@ -2,13 +2,18 @@ package n26
 
 import (
 	"io"
+	"strings"
 
 	"github.com/nootey/wealth-warden-prepper/pkg/statement"
 )
 
 type N26 struct{}
 
-var _ statement.Parser = N26{}
+var (
+	_ statement.Parser      = N26{}
+	_ statement.Detector    = N26{}
+	_ statement.LinesParser = N26{}
+)
 
 var csvHints = statement.CSVHints{
 	Aliases: map[string]statement.Field{
@@ -27,3 +32,14 @@ func ParseCSV(r io.Reader) ([]statement.Transaction, error) {
 
 func (N26) ParseCSV(r io.Reader) ([]statement.Transaction, error) { return ParseCSV(r) }
 func (N26) ParsePDF(r io.Reader) ([]statement.Transaction, error) { return ParsePDF(r) }
+
+func (N26) DetectCSV(header []string) int {
+	n := 0
+	for _, h := range header {
+		key := strings.TrimSpace(strings.TrimPrefix(h, "\uFEFF"))
+		if _, ok := csvHints.Aliases[key]; ok {
+			n++
+		}
+	}
+	return n
+}

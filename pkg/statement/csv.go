@@ -102,6 +102,16 @@ func sniffDelimiter(raw []byte) rune {
 	return best
 }
 
+func PeekCSVHeader(raw []byte) ([]string, error) {
+	raw = bytes.TrimPrefix(raw, []byte("\uFEFF"))
+	cr := csv.NewReader(bytes.NewReader(raw))
+	cr.Comma = sniffDelimiter(raw)
+	cr.LazyQuotes = true
+	cr.FieldsPerRecord = -1
+	cr.TrimLeadingSpace = true
+	return cr.Read()
+}
+
 // ParseGenericCSV parses a tabular bank export on a best-effort basis: it
 // sniffs the delimiter and maps headers via the base dictionary plus any
 // bank-specific hints. When no sign column is present, direction is

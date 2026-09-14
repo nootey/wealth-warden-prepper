@@ -112,6 +112,18 @@ func ParsePDFText(lines []string) ([]statement.Transaction, error) {
 	return out, nil
 }
 
+func (NLB) DetectPDF(lines []string) int {
+	n := 0
+	for _, l := range lines {
+		if pdfTxnRe.MatchString(l) {
+			n++
+		}
+	}
+	return n
+}
+
+func (NLB) ParsePDFLines(lines []string) ([]statement.Transaction, error) { return ParsePDFText(lines) }
+
 func isChrome(trimmed string) bool {
 	l := strings.ToLower(trimmed)
 	for _, p := range pdfChromePrefixes {

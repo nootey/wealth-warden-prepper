@@ -18,6 +18,18 @@ var (
 	ibanRe = regexp.MustCompile(`^IBAN:\s*(\S+)`)
 )
 
+func (N26) DetectPDF(lines []string) int {
+	n := 0
+	for _, l := range lines {
+		if pdfTxnRe.MatchString(l) {
+			n++
+		}
+	}
+	return n
+}
+
+func (N26) ParsePDFLines(lines []string) ([]statement.Transaction, error) { return ParsePDFText(lines) }
+
 func ParsePDF(r io.Reader) ([]statement.Transaction, error) {
 	lines, err := pdftext.ExtractReader(r)
 	if err != nil {
