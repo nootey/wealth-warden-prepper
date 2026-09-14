@@ -6,10 +6,18 @@ custom transaction import.
 
 Supported banks:
 
-| Bank | Format | Notes |
-|------|--------|-------|
-| NLB (Slovenia) | CSV from NLB Klik, 1 to 12 months | Inflow and outflow exports, any mix of files |
-| NLB (Slovenia) | Monthly PDF statement (Izpisek) | Needs `pdftotext` from poppler |
+| Bank | Format                     |
+|------|----------------------------|
+| NLB (Slovenia) | CSV export / PDF statement |
+| N26 | CSV export / PDF statement |
+
+Anything else can be tried with `-bank generic`. It sniffs the CSV delimiter
+and maps common column names (date, amount, description, IBAN, ...) without
+knowing the bank ahead of time, so it's a decent first try before writing a
+real parser. 
+
+PDF statements don't generalize this way since every bank lays
+them out differently, so those still need bank-specific support.
 
 ## Requirements
 
@@ -77,8 +85,28 @@ payload := format.Build("nlb_2021", txns, time.Now())
 
 ## Adding a bank
 
-1. Create `pkg/bank<name>` with a type that implements `statement.Parser`.
-2. Add it to the registry in `pkg/bank/bank.go`.
+CSV parsing is shared across banks: `pkg/statement` sniffs the delimiter and
+already knows a bunch of common column names. Most new banks just need a
+short list of hints, in `pkg/rules/<name>`:
+
+```go
+var csvHints = statement.CSVHints{
+    Aliases: map[string]statement.Field{
+        "Partner Name": statement.FieldCounterparty,
+    },
+    DefaultCurrency: "EUR",
+}
+```
+
+Run the CSV through `-bank generic` first and see what it fails to map -
+that tells you which aliases are missing.
+
+PDF statements don't generalize, since every bank lays them out differently,
+so those need an actual parser. Look at `pkg/rules/nlb/pdf.go` or
+`pkg/rules/n26/pdf.go` for the shape of one.
+
+Either way, once the type implements `statement.Parser`, register it in
+`pkg/bank/bank.go`.
 
 ## Development
 
