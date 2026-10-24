@@ -22,7 +22,7 @@ them out differently, so those still need bank-specific support.
 
 ## Requirements
 
-- Go 1.26+
+- Go 1.27+
 - `pdftotext` (package `poppler-utils`) for PDF statements. CSV files work without it.
 
 ## Usage
