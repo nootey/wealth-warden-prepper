@@ -1,0 +1,21 @@
+name: "Require Release Label"
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
+
+jobs:
+  release-label:
+    name: Release label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for a release label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          if ! echo "$LABELS" | grep -qE '"release:(major|minor|patch)"'; then
+            echo "::error::Add a release:major, release:minor or release:patch label before merging."
+            exit 1
+          fi
